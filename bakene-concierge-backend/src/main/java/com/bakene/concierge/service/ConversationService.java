@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import com.bakene.concierge.entity.Message;
 import com.bakene.concierge.repository.MessageRepository;
 
+import java.util.List;
+
 import java.util.Optional;
 
 @Service
@@ -45,6 +47,9 @@ public ConversationService(
         return conversationRepository.save(conversation);
     }
 
+   public List<Conversation> getAllConversations() {
+    return conversationRepository.findAll();
+}
     public String processMessage(String whatsappNumber, String message) {
 
         // Find existing conversation or create a new one
