@@ -1,17 +1,17 @@
 package com.bakene.concierge.controller;
 
-import com.bakene.concierge.entity.Conversation;
+import com.bakene.concierge.entity.Message;
 import com.bakene.concierge.service.ConversationService;
 import com.bakene.concierge.service.MessageService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class AdminApiController {
 
     private final ConversationService conversationService;
@@ -26,23 +26,27 @@ public class AdminApiController {
     }
 
     @GetMapping("/dashboard")
-    public Map<String,Object> dashboard(){
+    public Map<String, Object> dashboard() {
 
-        Map<String,Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
 
-        response.put(
-                "totalConversations",
+        response.put("totalConversations",
                 conversationService.getAllConversations().size());
 
-        response.put(
-                "totalMessages",
+        response.put("totalMessages",
                 messageService.getAllMessages().size());
 
-        response.put(
-                "conversations",
+        response.put("conversations",
                 conversationService.getAllConversations());
 
         return response;
+    }
+
+    @GetMapping("/conversation/{id}")
+    public List<Message> getConversationMessages(
+            @PathVariable Long id) {
+
+        return messageService.getConversationMessages(id);
     }
 
 }

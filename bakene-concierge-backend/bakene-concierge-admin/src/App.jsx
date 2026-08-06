@@ -1,121 +1,80 @@
 import "./App.css";
-
-function Card({ title, value, icon }) {
-  return (
-    <div className="card">
-      <div className="icon">{icon}</div>
-      <h3>{title}</h3>
-      <h1>{value}</h1>
-    </div>
-  );
-}
+import { useEffect, useState } from "react";
 
 function App() {
+
+  const [dashboard, setDashboard] = useState({
+    totalConversations: 0,
+    totalMessages: 0,
+    conversations: []
+  });
+
+  useEffect(() => {
+    loadDashboard();
+
+    const timer = setInterval(() => {
+      loadDashboard();
+    }, 5000);
+
+    return () => clearInterval(timer);
+
+  }, []);
+
+  async function loadDashboard() {
+
+    const response = await fetch(
+      "https://the-ba-kene-concierge.onrender.com/api/admin/dashboard"
+    );
+
+    const data = await response.json();
+
+    setDashboard(data);
+  }
+
   return (
     <div className="container">
 
       <h1>BA KENE Concierge</h1>
 
       <p className="subtitle">
-        Customer Management Dashboard
+        Live Customer Management Dashboard
       </p>
 
       <div className="cards">
 
-        <Card
-          title="Conversations"
-          value="15"
-          icon="💬"
-        />
+        <div className="card">
+          <h3>Conversations</h3>
+          <h1>{dashboard.totalConversations}</h1>
+        </div>
+<tbody>
 
-        <Card
-          title="Bookings"
-          value="4"
-          icon="📅"
-        />
+{dashboard.conversations.map((conversation) => (
 
-        <Card
-          title="Support Tickets"
-          value="2"
-          icon="🎫"
-        />
+<tr
+  key={conversation.id}
+  onClick={() => window.location.href = `/conversation/${conversation.id}`}
+  style={{ cursor: "pointer" }}
+>
 
-        <Card
-          title="New Distributors"
-          value="6"
-          icon="👥"
-        />
+<td>{conversation.whatsappNumber}</td>
 
-      </div>
+<td>{conversation.userType}</td>
 
-      <div className="section">
+<td>{conversation.currentStep}</td>
 
-        <h2>Today's Bookings</h2>
+<td>{conversation.skinType || "-"}</td>
 
-        <table>
+<td>{conversation.skinConcern || "-"}</td>
 
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+<td>{conversation.status}</td>
 
-          <tbody>
+</tr>
 
-            <tr>
-              <td>John</td>
-              <td>Tuesday</td>
-              <td>09:00</td>
-              <td>Pending</td>
-            </tr>
+))}
 
-            <tr>
-              <td>Mary</td>
-              <td>Thursday</td>
-              <td>11:00</td>
-              <td>Confirmed</td>
-            </tr>
+</tbody>
 
-          </tbody>
-
-        </table>
-
-      </div>
-
-      <div className="section">
-
-        <h2>Recent Conversations</h2>
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Phone</th>
-              <th>Current Step</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr>
-              <td>082*******</td>
-              <td>Skin Type</td>
-              <td>Active</td>
-            </tr>
-
-            <tr>
-              <td>073*******</td>
-              <td>Booking</td>
-              <td>Waiting</td>
-            </tr>
-
-          </tbody>
-
-        </table>
+      
 
       </div>
 
