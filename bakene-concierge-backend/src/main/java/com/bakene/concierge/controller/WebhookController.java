@@ -48,60 +48,82 @@ public class WebhookController {
                 .body("Verification failed");
     }
 
-    @PostMapping
-    public ResponseEntity<String> receiveMessage(
-            @RequestBody Map<String, Object> payload) {
+   @PostMapping
+public ResponseEntity<String> receiveMessage(
+        @RequestBody Map<String, Object> payload) {
 
-        try {
+    System.out.println("========== NEW WHATSAPP MESSAGE ==========");
+    System.out.println(payload);
 
-            List<Map<String, Object>> entries =
-                    (List<Map<String, Object>>) payload.get("entry");
+    try {
 
-            for (Map<String, Object> entry : entries) {
+        List<Map<String, Object>> entries =
+                (List<Map<String, Object>>) payload.get("entry");
 
-                List<Map<String, Object>> changes =
-                        (List<Map<String, Object>>) entry.get("changes");
+        System.out.println("Entries: " + entries.size());
 
-                for (Map<String, Object> change : changes) {
+        for (Map<String, Object> entry : entries) {
 
-                    Map<String, Object> value =
-                            (Map<String, Object>) change.get("value");
+            List<Map<String, Object>> changes =
+                    (List<Map<String, Object>>) entry.get("changes");
 
-                    if (!value.containsKey("messages"))
+            for (Map<String, Object> change : changes) {
+
+                Map<String, Object> value =
+                        (Map<String, Object>) change.get("value");
+
+                System.out.println("Value:");
+                System.out.println(value);
+
+                if (!value.containsKey("messages")) {
+                    System.out.println("No messages found.");
+                    continue;
+                }
+
+                List<Map<String, Object>> messages =
+                        (List<Map<String, Object>>) value.get("messages");
+
+                for (Map<String, Object> message : messages) {
+
+                    System.out.println("Incoming message:");
+                    System.out.println(message);
+
+                    String from =
+                            (String) message.get("from");
+
+                    Map<String, Object> text =
+                            (Map<String, Object>) message.get("text");
+
+                    if (text == null) {
+                        System.out.println("Message has no text.");
                         continue;
-
-                    List<Map<String, Object>> messages =
-                            (List<Map<String, Object>>) value.get("messages");
-
-                    for (Map<String, Object> message : messages) {
-
-                        String from =
-                                (String) message.get("from");
-
-                        Map<String, Object> text =
-                                (Map<String, Object>) message.get("text");
-
-                        if (text == null)
-                            continue;
-
-                        String body =
-                                (String) text.get("body");
-
-                        String reply =
-                                conversationService.processMessage(from, body);
-
-                        whatsAppService.sendMessage(from, reply);
                     }
+
+                    String body =
+                            (String) text.get("body");
+
+                    System.out.println("FROM : " + from);
+                    System.out.println("BODY : " + body);
+
+                    String reply =
+                            conversationService.processMessage(from, body);
+
+                    System.out.println("BOT REPLY : " + reply);
+
+                    whatsAppService.sendMessage(from, reply);
+
+                    System.out.println("Reply sent to WhatsApp.");
                 }
             }
-
-            return ResponseEntity.ok("EVENT_RECEIVED");
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return ResponseEntity.ok("EVENT_RECEIVED");
         }
+
+    } catch (Exception e) {
+
+        System.out.println("ERROR RECEIVING MESSAGE");
+        e.printStackTrace();
     }
+
+    return ResponseEntity.ok("EVENT_RECEIVED");
 }
+        
+    }
