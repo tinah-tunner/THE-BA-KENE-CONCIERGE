@@ -1,31 +1,30 @@
 package com.bakene.concierge.service;
 
 import com.bakene.concierge.entity.Conversation;
-import com.bakene.concierge.repository.ConversationRepository;
-import org.springframework.stereotype.Service;
 import com.bakene.concierge.entity.Message;
+import com.bakene.concierge.repository.ConversationRepository;
 import com.bakene.concierge.repository.MessageRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 import java.util.Optional;
 
 @Service
 public class ConversationService {
 
     private final ConversationRepository conversationRepository;
-private final MessageRepository messageRepository;
-private final ConciergeService conciergeService;
+    private final MessageRepository messageRepository;
+    private final ConciergeService conciergeService;
 
-public ConversationService(
-        ConversationRepository conversationRepository,
-        MessageRepository messageRepository,
-        ConciergeService conciergeService) {
+    public ConversationService(
+            ConversationRepository conversationRepository,
+            MessageRepository messageRepository,
+            ConciergeService conciergeService) {
 
-    this.conversationRepository = conversationRepository;
-    this.messageRepository = messageRepository;
-    this.conciergeService = conciergeService;
-}
+        this.conversationRepository = conversationRepository;
+        this.messageRepository = messageRepository;
+        this.conciergeService = conciergeService;
+    }
 
     public Conversation createConversation(String whatsappNumber, String userType) {
 
@@ -47,262 +46,299 @@ public ConversationService(
         return conversationRepository.save(conversation);
     }
 
-   public List<Conversation> getAllConversations() {
-    return conversationRepository.findAll();
-}
+    public List<Conversation> getAllConversations() {
+        return conversationRepository.findAll();
+    }
+
     public String processMessage(String whatsappNumber, String message) {
 
-        // Find existing conversation or create a new one
         Conversation conversation = conversationRepository
                 .findByWhatsappNumber(whatsappNumber)
-                .orElseGet(() ->
-                        createConversation(whatsappNumber, "DISTRIBUTOR"));
+                .orElseGet(() -> createConversation(whatsappNumber, "DISTRIBUTOR"));
 
-        // Clean user input
         String cleanMessage = message.trim().toLowerCase();
 
-        // Greetings always return to the main menu
+        String currentStep = conversation.getCurrentStep();
+        String nextStep = currentStep;
+
+        /*
+         * Greetings always restart the conversation
+         */
+
         if (cleanMessage.equals("hi")
                 || cleanMessage.equals("hello")
                 || cleanMessage.equals("hey")
                 || cleanMessage.equals("start")
                 || cleanMessage.equals("menu")) {
 
-            conversation.setCurrentStep("WELCOME");
-            conversationRepository.save(conversation);
-
-            return conciergeService.getWelcomeMenu();
+            nextStep = "WELCOME";
         }
 
-        String currentStep = conversation.getCurrentStep();
-        String nextStep = currentStep;
+        else {
 
-        switch (currentStep) {
+            switch (currentStep) {
 
-          case "WELCOME":
+                case "WELCOME":
 
-    if (cleanMessage.equals("1"))
-        nextStep = "DISTRIBUTOR_ONBOARDING";
+                    if (cleanMessage.equals("1")) {
+                        nextStep = "DISTRIBUTOR_ONBOARDING";
+                    }
 
-    else if (cleanMessage.equals("2"))
-        nextStep = "FAQ";
+                    else if (cleanMessage.equals("2")) {
+                        nextStep = "FAQ";
+                    }
 
-    else if (cleanMessage.equals("3"))
-        nextStep = "SUPPORT";
+                    else if (cleanMessage.equals("3")) {
+                        nextStep = "SUPPORT";
+                    }
 
-    else if (cleanMessage.equals("4"))
-        nextStep = "SKIN_TYPE";
+                    else if (cleanMessage.equals("4")) {
+                        nextStep = "SKIN_TYPE";
+                    }
 
-    break;
+                    break;
 
-            case "DISTRIBUTOR_ONBOARDING":
+                                    case "DISTRIBUTOR_ONBOARDING":
 
-                if (cleanMessage.equals("1"))
-                    nextStep = "ABOUT_BAKENE";
+                    if (cleanMessage.equals("1")) {
+                        nextStep = "ABOUT_BAKENE";
+                    }
 
-                else if (cleanMessage.equals("2"))
-                    nextStep = "PACKAGES_PRODUCTS";
+                    else if (cleanMessage.equals("2")) {
+                        nextStep = "PACKAGES_PRODUCTS";
+                    }
 
-                else if (cleanMessage.equals("3"))
-                    nextStep = "TRAINING";
+                    else if (cleanMessage.equals("3")) {
+                        nextStep = "TRAINING";
+                    }
 
-                else if (cleanMessage.equals("4"))
-                    nextStep = "SUPPORT";
+                    else if (cleanMessage.equals("4")) {
+                        nextStep = "SUPPORT";
+                    }
 
-                else if (cleanMessage.equals("0"))
-                    nextStep = "WELCOME";
+                    else if (cleanMessage.equals("0")) {
+                        nextStep = "WELCOME";
+                    }
 
-                break;
+                    break;
 
-            case "ABOUT_BAKENE":
+                case "ABOUT_BAKENE":
 
-                if (cleanMessage.equals("1"))
-                    nextStep = "PACKAGES_PRODUCTS";
+                    if (cleanMessage.equals("1")) {
+                        nextStep = "PACKAGES_PRODUCTS";
+                    }
 
-                else if (cleanMessage.equals("2"))
-                    nextStep = "TRAINING";
+                    else if (cleanMessage.equals("2")) {
+                        nextStep = "TRAINING";
+                    }
 
-                else if (cleanMessage.equals("3"))
-                    nextStep = "SUPPORT";
+                    else if (cleanMessage.equals("3")) {
+                        nextStep = "SUPPORT";
+                    }
 
-                else if (cleanMessage.equals("0"))
-                    nextStep = "DISTRIBUTOR_ONBOARDING";
+                    else if (cleanMessage.equals("0")) {
+                        nextStep = "DISTRIBUTOR_ONBOARDING";
+                    }
 
-                break;
+                    break;
 
-            case "PACKAGES_PRODUCTS":
+                case "PACKAGES_PRODUCTS":
 
-                if (cleanMessage.equals("1"))
-                    nextStep = "PRODUCTS";
+                    if (cleanMessage.equals("1")) {
+                        nextStep = "PRODUCTS";
+                    }
 
-                else if (cleanMessage.equals("2"))
-                    nextStep = "PACKAGES";
+                    else if (cleanMessage.equals("2")) {
+                        nextStep = "PACKAGES";
+                    }
 
-                else if (cleanMessage.equals("0"))
-                    nextStep = "DISTRIBUTOR_ONBOARDING";
+                    else if (cleanMessage.equals("0")) {
+                        nextStep = "DISTRIBUTOR_ONBOARDING";
+                    }
 
-                break;
+                    break;
 
-            case "PRODUCTS":
+                case "PRODUCTS":
 
-                if (cleanMessage.equals("0"))
-                    nextStep = "PACKAGES_PRODUCTS";
+                    if (cleanMessage.equals("0")) {
+                        nextStep = "PACKAGES_PRODUCTS";
+                    }
 
-                break;
+                    break;
 
-            case "PACKAGES":
+                case "PACKAGES":
 
-                if (cleanMessage.equals("0"))
-                    nextStep = "PACKAGES_PRODUCTS";
+                    if (cleanMessage.equals("0")) {
+                        nextStep = "PACKAGES_PRODUCTS";
+                    }
 
-                break;
+                    break;
 
-            case "TRAINING":
+                case "TRAINING":
 
-                if (cleanMessage.equals("0"))
-                    nextStep = "DISTRIBUTOR_ONBOARDING";
+                    if (cleanMessage.equals("0")) {
+                        nextStep = "DISTRIBUTOR_ONBOARDING";
+                    }
 
-                break;
+                    break;
 
-            case "SUPPORT":
+                case "SUPPORT":
 
-                if (cleanMessage.equals("0"))
-                    nextStep = "DISTRIBUTOR_ONBOARDING";
+                    if (cleanMessage.equals("0")) {
+                        nextStep = "WELCOME";
+                    }
 
-                break;
+                    break;
 
-         case "FAQ":
+                case "FAQ":
 
-    if (cleanMessage.equals("0"))
-        nextStep = "WELCOME";
+                    if (cleanMessage.equals("0")) {
+                        nextStep = "WELCOME";
+                    }
 
-    break;
+                    break;
 
-case "SKIN_TYPE":
+                case "SKIN_TYPE":
 
-    if (cleanMessage.equals("1")) {
-        conversation.setSkinType("Dry");
-        nextStep = "SKIN_CONCERN";
-    }
+                    if (cleanMessage.equals("1")) {
+                        conversation.setSkinType("Dry");
+                        nextStep = "SKIN_CONCERN";
+                    }
 
-    else if (cleanMessage.equals("2")) {
-        conversation.setSkinType("Oily");
-        nextStep = "SKIN_CONCERN";
-    }
+                    else if (cleanMessage.equals("2")) {
+                        conversation.setSkinType("Oily");
+                        nextStep = "SKIN_CONCERN";
+                    }
 
-    else if (cleanMessage.equals("3")) {
-        conversation.setSkinType("Combination");
-        nextStep = "SKIN_CONCERN";
-    }
+                    else if (cleanMessage.equals("3")) {
+                        conversation.setSkinType("Combination");
+                        nextStep = "SKIN_CONCERN";
+                    }
 
-    else if (cleanMessage.equals("4")) {
-        conversation.setSkinType("Sensitive");
-        nextStep = "SKIN_CONCERN";
-    }
-
-    else if (cleanMessage.equals("5")) {
-        conversation.setSkinType("Normal");
-        nextStep = "SKIN_CONCERN";
-    }
+                    else if (cleanMessage.equals("4")) {
+                        conversation.setSkinType("Sensitive");
+                        nextStep = "SKIN_CONCERN";
+                    }
 
-    else if (cleanMessage.equals("6")) {
-        conversation.setSkinType("Not Sure");
-        nextStep = "SKIN_CONCERN";
-    }
+                    else if (cleanMessage.equals("5")) {
+                        conversation.setSkinType("Normal");
+                        nextStep = "SKIN_CONCERN";
+                    }
 
-    else if (cleanMessage.equals("0")) {
-        nextStep = "WELCOME";
-    }
+                    else if (cleanMessage.equals("6")) {
+                        conversation.setSkinType("Not Sure");
+                        nextStep = "SKIN_CONCERN";
+                    }
 
-    break;
+                    else if (cleanMessage.equals("0")) {
+                        nextStep = "WELCOME";
+                    }
 
-case "SKIN_CONCERN":
+                    break;
 
-    if (cleanMessage.equals("1")) {
-        conversation.setSkinConcern("Acne");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                case "SKIN_CONCERN":
 
-    else if (cleanMessage.equals("2")) {
-        conversation.setSkinConcern("Dark Marks");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                    if (cleanMessage.equals("1")) {
+                        conversation.setSkinConcern("Acne");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    else if (cleanMessage.equals("3")) {
-        conversation.setSkinConcern("Hyperpigmentation");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                    else if (cleanMessage.equals("2")) {
+                        conversation.setSkinConcern("Dark Marks");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    else if (cleanMessage.equals("4")) {
-        conversation.setSkinConcern("Dry Skin");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                    else if (cleanMessage.equals("3")) {
+                        conversation.setSkinConcern("Hyperpigmentation");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    else if (cleanMessage.equals("5")) {
-        conversation.setSkinConcern("Uneven Skin Tone");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                    else if (cleanMessage.equals("4")) {
+                        conversation.setSkinConcern("Dry Skin");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    else if (cleanMessage.equals("6")) {
-        conversation.setSkinConcern("Sun Damage");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                    else if (cleanMessage.equals("5")) {
+                        conversation.setSkinConcern("Uneven Skin Tone");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    else if (cleanMessage.equals("7")) {
-        conversation.setSkinConcern("Fine Lines");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                    else if (cleanMessage.equals("6")) {
+                        conversation.setSkinConcern("Sun Damage");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    else if (cleanMessage.equals("8")) {
-        conversation.setSkinConcern("Other");
-        nextStep = "CONSULTATION_COMPLETE";
-    }
+                    else if (cleanMessage.equals("7")) {
+                        conversation.setSkinConcern("Fine Lines");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    else if (cleanMessage.equals("0")) {
-        nextStep = "SKIN_TYPE";
-    }
+                    else if (cleanMessage.equals("8")) {
+                        conversation.setSkinConcern("Other");
+                        nextStep = "CONSULTATION_COMPLETE";
+                    }
 
-    break;
+                    else if (cleanMessage.equals("0")) {
+                        nextStep = "SKIN_TYPE";
+                    }
 
-case "CONSULTATION_COMPLETE":
+                    break;
 
-    if (cleanMessage.equals("1"))
-        nextStep = "SKIN_TYPE";
+                case "CONSULTATION_COMPLETE":
 
-    else if (cleanMessage.equals("2"))
-        nextStep = "SUPPORT";
+                    if (cleanMessage.equals("1")) {
+                        nextStep = "SKIN_TYPE";
+                    }
 
-    else if (cleanMessage.equals("0"))
-        nextStep = "WELCOME";
+                    else if (cleanMessage.equals("2")) {
+                        nextStep = "SUPPORT";
+                    }
 
-    break;
-}
+                    else if (cleanMessage.equals("0")) {
+                        nextStep = "WELCOME";
+                    }
 
-conversation.setCurrentStep(nextStep);
-conversationRepository.save(conversation);
+                    break;
+            }
+        }
+                conversation.setCurrentStep(nextStep);
+        conversationRepository.save(conversation);
 
-// Save customer's message
-Message userMessage = new Message();
-userMessage.setConversation(conversation);
-userMessage.setSender(whatsappNumber);
-userMessage.setDirection("INCOMING");
-userMessage.setMessage(message);
+        // Save customer's incoming message
+        Message userMessage = new Message();
+        userMessage.setConversation(conversation);
+        userMessage.setSender(whatsappNumber);
+        userMessage.setDirection("INCOMING");
+        userMessage.setMessage(message);
 
-messageRepository.save(userMessage);
+        messageRepository.save(userMessage);
 
-// Generate bot reply
-String botReply = conciergeService.handleSelection(nextStep, cleanMessage);
+        // Generate bot reply
+        String botReply;
 
-// Save bot reply
-Message botMessage = new Message();
-botMessage.setConversation(conversation);
-botMessage.setSender("BA KENE");
-botMessage.setDirection("OUTGOING");
-botMessage.setMessage(botReply);
+        if ("WELCOME".equals(nextStep)
+                && (cleanMessage.equals("hi")
+                || cleanMessage.equals("hello")
+                || cleanMessage.equals("hey")
+                || cleanMessage.equals("start")
+                || cleanMessage.equals("menu"))) {
 
-messageRepository.save(botMessage);
+            botReply = conciergeService.getWelcomeMenu();
 
-return botReply;
+        } else {
 
+            botReply = conciergeService.handleSelection(nextStep, cleanMessage);
+        }
+
+        // Save bot reply
+        Message botMessage = new Message();
+        botMessage.setConversation(conversation);
+        botMessage.setSender("BA KENE");
+        botMessage.setDirection("OUTGOING");
+        botMessage.setMessage(botReply);
+
+        messageRepository.save(botMessage);
+
+        return botReply;
     }
 }

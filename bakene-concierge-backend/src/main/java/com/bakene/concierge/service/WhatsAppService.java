@@ -15,52 +15,54 @@ public class WhatsAppService {
 
     public WhatsAppService(RestTemplate restTemplate,
                            MetaConfig config) {
-
         this.restTemplate = restTemplate;
         this.config = config;
     }
-public void sendMessage(String to, String message) {
 
-    String url =
-            "https://graph.facebook.com/v23.0/"
-                    + config.getPhoneNumberId()
-                    + "/messages";
+    public void sendMessage(String to, String message) {
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setBearerAuth(config.getAccessToken());
-    headers.setContentType(MediaType.APPLICATION_JSON);
+        String url =
+                "https://graph.facebook.com/v23.0/"
+                        + config.getPhoneNumberId()
+                        + "/messages";
 
-    Map<String,Object> body = Map.of(
-            "messaging_product","whatsapp",
-            "to",to,
-            "type","text",
-            "text",Map.of("body",message)
-    );
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(config.getAccessToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-    HttpEntity<Map<String,Object>> request =
-            new HttpEntity<>(body,headers);
+        Map<String, Object> body = Map.of(
+                "messaging_product", "whatsapp",
+                "to", to,
+                "type", "text",
+                "text", Map.of("body", message)
+        );
 
-    System.out.println("===== SENDING MESSAGE =====");
-    System.out.println("URL: " + url);
-    System.out.println("TO: " + to);
-    System.out.println("BODY: " + message);
+        HttpEntity<Map<String, Object>> request =
+                new HttpEntity<>(body, headers);
 
-    try {
+        System.out.println("========== SENDING WHATSAPP ==========");
+        System.out.println("URL: " + url);
+        System.out.println("TO: " + to);
+        System.out.println("MESSAGE:");
+        System.out.println(message);
 
-        ResponseEntity<String> response =
-                restTemplate.postForEntity(
-                        url,
-                        request,
-                        String.class
-                );
+        try {
 
-        System.out.println("Status: " + response.getStatusCode());
-        System.out.println("Response: " + response.getBody());
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(
+                            url,
+                            request,
+                            String.class
+                    );
 
-    } catch (Exception e) {
+            System.out.println("META STATUS: " + response.getStatusCode());
+            System.out.println("META RESPONSE:");
+            System.out.println(response.getBody());
 
-        System.out.println("WHATSAPP SEND FAILED");
-        e.printStackTrace();
+        } catch (Exception ex) {
+
+            System.out.println("========== META ERROR ==========");
+            ex.printStackTrace();
+        }
     }
-}
 }
